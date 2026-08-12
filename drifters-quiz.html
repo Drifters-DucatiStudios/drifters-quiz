@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which DRIFTER Is Most Like You?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ultra&family=Baloo+2:wght@500;600;700;800&family=Bitter:ital,wght@0,400;0,500;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#a9c6db;
+    --sky-mid:#dfd6bf;
+    --sky-bottom:#f2e7cd;
+    --sand:#c99a67;
+    --sand-dark:#8a5c34;
+    --sand-shadow:#5e3a1e;
+    --gold-light:#e8c07f;
+    --gold:#d69a3e;
+    --gold-deep:#a8621f;
+    --ink:#2a1a0f;
+    --cream:#f8efdd;
+    --rust:#b34f28;
+    --rope:#7a5330;
+    --shadow-soft: 0 10px 30px rgba(42,26,15,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Bitter',serif;
+    color:var(--ink);
+    background:var(--sky-bottom);
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ============ shared background scene ============ */
+  .scene{
+    position:relative;
+    min-height:100vh;
+    background:
+      url('images/site-bg.jpg') center center / cover no-repeat,
+      linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-mid) 38%, var(--sky-bottom) 55%, var(--sand) 78%, var(--sand-dark) 100%);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .sunglow{
+    position:absolute; left:8%; bottom:14%;
+    width:60vw; height:40vh;
+    background:radial-gradient(ellipse at center, rgba(255,244,214,0.55) 0%, rgba(255,244,214,0) 70%);
+    pointer-events:none;
+  }
+
+  /* ============ header ============ */
+  .topbar-image-wrap{
+    position:relative; z-index:5;
+    width:70%;
+    display:block;
+    line-height:0;
+  }
+  .topbar-img{
+    display:block;
+    width:100%;
+    height:auto;
+  }
+  .topbar-watch-link{
+    position:absolute;
+    left:53.4%;
+    right:0;
+    top:0;
+    height:100%;
+    display:block;
+  }
+
+  /* ============ hero ============ */
+  .hero{
+    position:relative; z-index:3;
+    text-align:center;
+    padding:2vh 20px 3vh;
+  }
+  .hero-title-img{
+    display:inline-block;
+    width:min(90%, 720px);
+    height:auto;
+    filter:drop-shadow(3px 4px 4px rgba(42,26,15,0.25));
+  }
+  .cta-line{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:clamp(18px,3vw,30px);
+    color:var(--ink);
+    margin-top:14px;
+  }
+  .start-btn{
+    display:block;
+    margin:22px auto 0;
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    transition:transform 0.15s ease, filter 0.15s ease;
+  }
+  .start-btn-img{
+    display:block;
+    width:min(20%, 320px);
+    min-width:140px;
+    height:auto;
+    margin:0 auto;
+    filter:drop-shadow(3px 6px 10px rgba(42,26,15,0.35));
+  }
+  .start-btn:hover{transform:translateY(-3px) scale(1.03);}
+  .start-btn:hover .start-btn-img{filter:drop-shadow(4px 10px 16px rgba(42,26,15,0.45));}
+
+  /* ============ polaroid strip ============ */
+  .strip{
+    position:relative; z-index:3;
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:10px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding:4vh 3vw 6vh;
+    scrollbar-width:thin;
+  }
+  .polaroid{
+    width:min(9.5vw, 118px);
+    min-width:80px;
+    transform:rotate(var(--tilt, 0deg));
+    transition:transform 0.25s ease;
+    flex:0 0 auto;
+  }
+  .polaroid:hover{transform:rotate(0deg) translateY(-6px) scale(1.04); z-index:2;}
+  .polaroid .frame{
+    width:100%; aspect-ratio:3/4;
+    background:linear-gradient(160deg,#d9c19a,#a97c50);
+    border-radius:6px;
+    overflow:hidden;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 18px rgba(42,26,15,0.35);
+  }
+  .polaroid .frame img{width:100%; height:100%; object-fit:cover; display:block;}
+  .polaroid .frame .placeholder{
+    color:var(--cream);
+    font-family:'Special Elite', monospace;
+    font-size:11px;
+    text-align:center;
+    padding:6px;
+    opacity:0.85;
+  }
+  .polaroid .cap{
+    display:block;
+    text-align:center;
+    font-family:'Special Elite', monospace;
+    font-size:11px;
+    color:#ffffff;
+    text-shadow:0 2px 4px rgba(0,0,0,0.55);
+    margin-top:8px;
+    letter-spacing:0.5px;
+  }
+
+  /* ============ quiz screen ============ */
+  .quiz-wrap{
+    position:relative; z-index:3;
+    max-width:720px;
+    margin:0 auto;
+    padding:6vh 20px 8vh;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    width:100%;
+  }
+  .progress-row{
+    display:flex; justify-content:center; gap:8px; margin-bottom:26px; flex-wrap:wrap;
+  }
+  .progress-dot{
+    width:14px; height:14px; border-radius:50%;
+    background:rgba(42,26,15,0.18);
+    border:2px solid rgba(42,26,15,0.3);
+    transition:background 0.2s ease, transform 0.2s ease;
+  }
+  .progress-dot.filled{background:var(--rust); border-color:var(--sand-shadow); transform:scale(1.15);}
+  .progress-dot.current{box-shadow:0 0 0 4px rgba(211,90,40,0.25);}
+
+  .q-eyebrow{
+    font-family:'Special Elite', monospace;
+    text-align:center;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    font-size:13px;
+    color:var(--sand-shadow);
+    margin-bottom:10px;
+  }
+  .q-card{
+    background:rgba(248,239,221,0.88);
+    border:2px solid rgba(94,58,30,0.35);
+    border-radius:6px;
+    padding:clamp(22px,4vw,40px);
+    box-shadow:var(--shadow-soft);
+    backdrop-filter:blur(2px);
+  }
+  .q-text{
+    font-family:'Ultra', serif;
+    font-size:clamp(22px,3.6vw,32px);
+    line-height:1.25;
+    text-align:center;
+    color:var(--ink);
+    margin:0 0 26px;
+    text-transform:none;
+  }
+  .choices{display:flex; flex-direction:column; gap:12px;}
+  .choice-btn{
+    font-family:'Bitter', serif;
+    font-size:16px;
+    text-align:left;
+    background:var(--cream);
+    border:2px solid var(--sand-shadow);
+    border-radius:8px;
+    padding:14px 18px;
+    color:var(--ink);
+    transition:transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+    box-shadow:0 3px 0 var(--sand-shadow);
+  }
+  .choice-btn:hover{background:#fff8ea; transform:translateY(-2px); box-shadow:0 5px 0 var(--sand-shadow);}
+  .choice-btn:active{transform:translateY(1px); box-shadow:0 1px 0 var(--sand-shadow);}
+  .choice-letter{
+    font-family:'Ultra', serif;
+    color:var(--rust);
+    margin-right:10px;
+  }
+
+  /* ============ result screen ============ */
+  .result-wrap{
+    position:relative; z-index:3;
+    max-width:720px;
+    margin:0 auto;
+    padding:6vh 20px 8vh;
+    flex:1;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+  }
+  .result-card-img{
+    width:100%;
+    max-width:680px;
+    height:auto;
+    border-radius:10px;
+    box-shadow:0 16px 34px rgba(42,26,15,0.4);
+    margin-bottom:26px;
+    animation:develop 1.1s ease both;
+  }
+  @keyframes develop{
+    0%{filter:sepia(1) brightness(0.5) contrast(0.8); opacity:0;}
+    40%{opacity:1;}
+    100%{filter:sepia(0) brightness(1) contrast(1); opacity:1;}
+  }
+  .result-btns{display:flex; gap:14px; flex-wrap:wrap; justify-content:center;}
+  .btn-secondary{
+    font-family:'Baloo 2', sans-serif; font-weight:700; font-size:15px;
+    background:transparent; border:2px solid var(--sand-shadow); color:var(--ink);
+    padding:13px 26px; border-radius:30px;
+    transition:background 0.15s ease;
+  }
+  .btn-secondary:hover{background:rgba(42,26,15,0.08);}
+  .btn-primary{
+    font-family:'Ultra', serif; font-size:15px; color:var(--cream);
+    background:linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+    border:2px solid var(--cream); text-decoration:underline; text-underline-offset:3px;
+    padding:14px 28px; border-radius:2px; box-shadow:var(--shadow-soft);
+  }
+  .btn-primary:hover{transform:translateY(-2px);}
+
+  footer.credit{
+    position:relative; z-index:3;
+    text-align:center;
+    font-family:'Special Elite', monospace;
+    font-size:11px;
+    letter-spacing:1px;
+    color:rgba(42,26,15,0.6);
+    padding:0 0 22px;
+  }
+
+  .hidden{display:none !important;}
+
+  @media (max-width:640px){
+    header.topbar{justify-content:center; text-align:center;}
+    .brandcluster{justify-content:center;}
+    .strip{gap:8px;}
+    .polaroid{width:26vw;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LANDING ================= -->
+<section id="screen-landing" class="scene">
+  <div class="sunglow"></div>
+
+  <header class="topbar-image-wrap">
+    <img class="topbar-img" src="images/header-banner.png" alt="Drifters — For Ducati Studios Network — Presented by Squirt">
+    <a class="topbar-watch-link" href="https://ducatistudios.com/drifters" target="_blank" rel="noopener" id="watch-link-top" aria-label="Watch Drifters Here"></a>
+  </header>
+
+  <div class="hero">
+    <img class="hero-title-img" src="images/hero-title.png" alt="Which DRIFTER Is Most Like You?">
+    <button class="start-btn" id="start-quiz-btn" aria-label="Take The Quiz">
+      <img class="start-btn-img" src="images/take-the-quiz-btn.png" alt="Take The Quiz">
+    </button>
+  </div>
+
+  <div class="strip" id="landing-strip"></div>
+
+  <footer class="credit">Drifters &middot; A Ducati Studios Network Production &middot; Presented by Squirt</footer>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section id="screen-quiz" class="scene hidden">
+  <div class="quiz-wrap">
+    <div class="progress-row" id="progress-row"></div>
+    <div class="q-eyebrow" id="q-counter">Question 1 of 10</div>
+    <div class="q-card">
+      <p class="q-text" id="q-text"></p>
+      <div class="choices" id="q-choices"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULT ================= -->
+<section id="screen-result" class="scene hidden">
+  <div class="sunglow"></div>
+  <div class="result-wrap">
+    <img class="result-card-img" id="result-card-img" src="" alt="Your Drifters result">
+    <div class="result-btns">
+      <button class="btn-secondary" id="retake-btn">Retake Quiz</button>
+      <a class="btn-primary" href="#" target="_blank" rel="noopener" id="watch-link-bottom">Watch Drifters Here</a>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ================= CONFIG ================= */
+// Update this to your real destination for the series.
+const WATCH_URL = "https://ducatistudios.com/drifters";
+document.getElementById('watch-link-top').href = WATCH_URL;
+document.getElementById('watch-link-bottom').href = WATCH_URL;
+
+// Drop real photos into an "images" folder next to this file, named
+// exactly as below. Until then, a styled placeholder is shown automatically.
+const CHARACTERS = {
+  buddy:    { name:"Buddy",    title:"The Innocent",        img:"images/buddy.png",      resultImg:"images/result-buddy.png",
+    desc:"Open-hearted and curious, Buddy wants to experience everything life has to offer. He's looking for affection, adventure, and a chance to discover himself." },
+  fella:    { name:"Fella",    title:"The Free Spirit",     img:"images/fella.png",      resultImg:"images/result-fella.png",
+    desc:"Fella follows the road wherever it leads. He lives for adventure, sensation, and enjoying the moment without a care in the world." },
+  bro:      { name:"Bro",      title:"The Bad Boy",         img:"images/bro.png",        resultImg:"images/result-bro.png",
+    desc:"Confident and in control, Bro knows what he wants — and isn't afraid to go after it. He craves power, pleasure, and the thrill of getting his way." },
+  dude:     { name:"Dude",     title:"The Heartthrob",      img:"images/dude.png",       resultImg:"images/result-dude.png",
+    desc:"Dude knows how to turn heads. He lives for freedom, attention, and the irresistible thrill of knowing he's wanted." },
+  handsome: { name:"Handsome", title:"The Wounded Beauty",  img:"images/handsome.png",   resultImg:"images/result-handsome.png",
+    desc:"Handsome is always searching for something beyond the horizon. A new destination, a new road, a new beginning." },
+  daddy:    { name:"Daddy",    title:"The Father Figure",   img:"images/daddy.png",      resultImg:"images/result-daddy.png",
+    desc:"Daddy is the one everyone can count on. Protective, responsible, and always making sure everyone gets home safely." },
+  wiseguy:  { name:"Wiseguy",  title:"The Smooth Operator", img:"images/wiseguy.png",    resultImg:"images/result-wiseguy.png",
+    desc:"Smooth, sharp, and always one step ahead, Wiseguy brings big-city confidence wherever he goes. He's always hungry for whatever comes next." },
+  rodeo:    { name:"Rodeo",    title:"The Showman",         img:"images/rodeo.png",      resultImg:"images/result-rodeo.png",
+    desc:"Rodeo knows how to put on a show. Charismatic, entertaining, and seemingly knowledgeable about a little bit of everything." },
+  boss:     { name:"Boss",     title:"The Sheriff",         img:"images/boss.png",       resultImg:"images/result-boss.png",
+    desc:"Boss likes things done his way. He craves order, authority, and obedience — and he knows exactly how to take control." }
+};
+const CHAR_ORDER = ["buddy","fella","bro","dude","handsome","daddy","wiseguy","rodeo","boss"];
+
+/* Each question: text + choices. Each choice awards points to 1-3 characters. */
+const QUESTIONS = [
+  { text:"A completely free weekend opens up. What sounds best?",
+    choices:[
+      {label:"Hit the road, no destination in mind", pts:{fella:2, handsome:1}},
+      {label:"Track down someone I've had my eye on", pts:{buddy:2, dude:1}},
+      {label:"Get dressed up and be seen somewhere good", pts:{dude:2, rodeo:1}},
+      {label:"Round up my people and make sure everyone's taken care of", pts:{daddy:2, boss:1}},
+      {label:"Find a place I've never been before", pts:{handsome:2, wiseguy:1}},
+    ]},
+  { text:"Someone challenges you in front of a group. You...",
+    choices:[
+      {label:"Smile and let it roll off — not worth the energy", pts:{buddy:2, rodeo:1}},
+      {label:"Meet it head-on, calm and unblinking", pts:{bro:2, boss:1}},
+      {label:"Turn it into a joke everyone laughs at", pts:{rodeo:2, wiseguy:1}},
+      {label:"Step in and settle it before it gets out of hand", pts:{daddy:2, boss:1}},
+      {label:"Size them up quietly — you don't forget it", pts:{bro:1, wiseguy:2}},
+    ]},
+  { text:"Pick a drink order at last call.",
+    choices:[
+      {label:"Whatever's cold and easy", pts:{fella:2, buddy:1}},
+      {label:"Whiskey, neat — no games", pts:{bro:2, boss:1}},
+      {label:"Something with a story behind it", pts:{wiseguy:2, handsome:1}},
+      {label:"I'm buying the table a round", pts:{rodeo:2, dude:1}},
+      {label:"I'm not drinking, I'm driving everyone home", pts:{daddy:2, boss:1}},
+    ]},
+  { text:"Your ideal Saturday night crowd is...",
+    choices:[
+      {label:"Just one person, somewhere quiet", pts:{handsome:2, buddy:1}},
+      {label:"A room that knows my name when I walk in", pts:{dude:2, wiseguy:1}},
+      {label:"Old friends who feel like family", pts:{daddy:2, rodeo:1}},
+      {label:"Strangers — new faces, new stories", pts:{fella:2, wiseguy:1}},
+      {label:"Small and tight — people I trust completely", pts:{boss:2, daddy:1}},
+    ]},
+  { text:"What's your relationship with rules?",
+    choices:[
+      {label:"I bend them when it suits me", pts:{bro:2, fella:1}},
+      {label:"I make them", pts:{boss:3}},
+      {label:"I follow them just enough to stay out of trouble", pts:{daddy:2, buddy:1}},
+      {label:"I never noticed there were any", pts:{buddy:2, fella:1}},
+      {label:"Someone has to enforce them, might as well be me", pts:{boss:2, bro:1}},
+    ]},
+  { text:"A stranger asks you for help on the road. You...",
+    choices:[
+      {label:"Help first, ask questions never", pts:{buddy:2, daddy:1}},
+      {label:"Size them up first — trust is earned", pts:{bro:2, boss:1}},
+      {label:"Charm your way into finding out their whole story", pts:{wiseguy:2, rodeo:1}},
+      {label:"Make sure they get exactly where they need to go, safely", pts:{daddy:2, boss:1}},
+      {label:"Depends what's in it for me", pts:{bro:1, wiseguy:2}},
+    ]},
+  { text:"What's the last thing people notice about you?",
+    choices:[
+      {label:"How gently I mean things", pts:{buddy:2, daddy:1}},
+      {label:"How long I've been carrying something", pts:{handsome:3}},
+      {label:"How much I actually think ahead", pts:{wiseguy:2, bro:1}},
+      {label:"How reliable I am", pts:{daddy:2, boss:1}},
+      {label:"That I was even paying attention", pts:{rodeo:2, wiseguy:1}},
+    ]},
+  { text:"Choose a horse.",
+    choices:[
+      {label:"Wild, untamed, hard to catch", pts:{fella:2, bro:1}},
+      {label:"Fast — built for leaving", pts:{dude:2, handsome:1}},
+      {label:"Loyal, steady, never spooks", pts:{daddy:2, buddy:1}},
+      {label:"Flashy, turns heads in town", pts:{rodeo:2, dude:1}},
+      {label:"Whichever one respects the bit", pts:{boss:2, bro:1}},
+    ]},
+  { text:"Someone crosses a line with you. What's your move?",
+    choices:[
+      {label:"Quiet disappointment — I don't need to say anything", pts:{handsome:2, buddy:1}},
+      {label:"I let them know, once, calmly", pts:{boss:2, wiseguy:1}},
+      {label:"I make an example out of it", pts:{bro:2, boss:1}},
+      {label:"I laugh about it later like it never mattered", pts:{rodeo:2, fella:1}},
+      {label:"I protect whoever else got caught in the middle", pts:{daddy:2, buddy:1}},
+    ]},
+  { text:"What are you really chasing, underneath it all?",
+    choices:[
+      {label:"To be known and loved for who I really am", pts:{buddy:2, dude:1}},
+      {label:"The next sunrise, somewhere new", pts:{fella:2, handsome:1}},
+      {label:"To finally feel like the past is behind me", pts:{handsome:2, wiseguy:1}},
+      {label:"Respect — the kind you don't have to ask for", pts:{boss:2, bro:1}},
+      {label:"Somewhere, someone, worth settling down for", pts:{daddy:2, dude:1}},
+    ]},
+];
+
+/* ================= STATE ================= */
+let currentQ = 0;
+let scores = {};
+CHAR_ORDER.forEach(c => scores[c] = 0);
+
+/* ================= HELPERS ================= */
+function polaroidFrameHTML(imgPath, name){
+  return `<img src="${imgPath}" alt="${name}" onerror="this.remove(); this.parentElement.querySelector('.placeholder').classList.remove('hidden');">
+          <div class="placeholder hidden">${name}<br>photo coming soon</div>`;
+}
+
+function buildLandingStrip(){
+  const strip = document.getElementById('landing-strip');
+  const tilts = [-6,4,-3,5,-5,3,-4,6,-2];
+  strip.innerHTML = CHAR_ORDER.map((key,i) => {
+    const c = CHARACTERS[key];
+    return `<div class="polaroid" style="--tilt:${tilts[i]}deg;">
+              <div class="frame">${polaroidFrameHTML(c.img, c.name)}</div>
+              <span class="cap">${c.name}</span>
+            </div>`;
+  }).join('');
+}
+
+function buildProgress(){
+  const row = document.getElementById('progress-row');
+  row.innerHTML = '';
+  for(let i=0;i<QUESTIONS.length;i++){
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot' + (i < currentQ ? ' filled' : '') + (i === currentQ ? ' current' : '');
+    row.appendChild(dot);
+  }
+}
+
+function renderQuestion(){
+  buildProgress();
+  document.getElementById('q-counter').textContent = `Question ${currentQ+1} of ${QUESTIONS.length}`;
+  const q = QUESTIONS[currentQ];
+  document.getElementById('q-text').textContent = q.text;
+  const lettersEl = document.getElementById('q-choices');
+  const letters = ['A','B','C','D','E'];
+  lettersEl.innerHTML = q.choices.map((choice,i) => `
+    <button class="choice-btn" data-index="${i}">
+      <span class="choice-letter">${letters[i]}.</span>${choice.label}
+    </button>
+  `).join('');
+  Array.from(lettersEl.querySelectorAll('.choice-btn')).forEach(btn => {
+    btn.addEventListener('click', () => selectAnswer(parseInt(btn.dataset.index,10)));
+  });
+}
+
+function selectAnswer(index){
+  const choice = QUESTIONS[currentQ].choices[index];
+  Object.entries(choice.pts).forEach(([char,pts]) => { scores[char] += pts; });
+  currentQ++;
+  if(currentQ < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function computeWinner(){
+  let winner = CHAR_ORDER[0];
+  let best = -1;
+  CHAR_ORDER.forEach(key => {
+    if(scores[key] > best){ best = scores[key]; winner = key; }
+  });
+  return winner;
+}
+
+function showResult(){
+  const winnerKey = computeWinner();
+  const c = CHARACTERS[winnerKey];
+  const img = document.getElementById('result-card-img');
+  img.src = c.resultImg;
+  img.alt = `You are ${c.name} — ${c.title}`;
+
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  // restart the "develop" animation each time
+  img.style.animation = 'none';
+  void img.offsetWidth;
+  img.style.animation = '';
+}
+
+function resetQuiz(){
+  currentQ = 0;
+  CHAR_ORDER.forEach(c => scores[c] = 0);
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-landing').classList.remove('hidden');
+}
+
+function startQuiz(){
+  document.getElementById('screen-landing').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  renderQuestion();
+}
+
+/* ================= INIT ================= */
+buildLandingStrip();
+document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
+document.getElementById('retake-btn').addEventListener('click', resetQuiz);
+</script>
+
+</body>
+</html>
